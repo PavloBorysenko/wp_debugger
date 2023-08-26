@@ -2,7 +2,7 @@
 /*
 Plugin Name: Debugger for Wordpress
 Plugin URI: https://#
-Description: Assistant for finding errors and optimizing scripts
+Description: Assistant for finding errors and optimizing scripts. ?wp-debugger=1| ?wp-debugger=phpinfo|?wp-debugger=pagedata
 Version: 0.0.1
 Requires at least: 5.8
 Requires PHP: 7.2

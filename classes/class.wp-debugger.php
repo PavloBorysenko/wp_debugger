@@ -44,7 +44,7 @@ class WpDebugger {
      * 0 - dont log, 1 - to  log file, 2 - var dump on page
      * @var int
      */
-    private $pageDataLogOption = 2;
+    private $pageDataLogOption = 1;
         
     /**
      * __construct
@@ -55,14 +55,28 @@ class WpDebugger {
         $this->timerStorage['init_wp_debugger'] = microtime(true);
         $this->byteStorage['init_wp_debugger'] = memory_get_usage();
 
-        //plugins_loaded init wp_head wp_footer shutdown
-        add_action('plugins_loaded', array($this, 'setPageData'));
-        add_action('init', array($this, 'setPageData'));
-        add_action('wp_head', array($this, 'setPageData'));
-        add_action('wp_footer', array($this, 'setPageData'));
-        add_action('admin_head', array($this, 'setPageData'));
-        add_action('admin_footer', array($this, 'setPageData'));       
-        add_action('shutdown', array($this, 'setPageData'));
+        if (isset($_GET[$this->getKey])) {
+
+            if ('phpinfo' == $_GET[$this->getKey]) {
+                add_action('init', array($this, 'phpinfo'), 9999);
+            }
+            
+            if ('pagedata' == $_GET[$this->getKey]) {
+                $this->pageDataLogOption = 2;
+            }
+        }
+
+        if (0 != $this->pageDataLogOption ) {
+            //plugins_loaded init wp_head wp_footer shutdown
+            add_action('plugins_loaded', array($this, 'setPageData'));
+            add_action('init', array($this, 'setPageData'));
+            add_action('wp_head', array($this, 'setPageData'));
+            add_action('wp_footer', array($this, 'setPageData'));
+            add_action('admin_head', array($this, 'setPageData'));
+            add_action('admin_footer', array($this, 'setPageData'));       
+            add_action('shutdown', array($this, 'setPageData'));
+        }
+
     }
         
     /**
@@ -72,12 +86,22 @@ class WpDebugger {
      */
     public function setPageData () : void{
         $actionName = current_action();
+       
+        $lastKey = array_key_last($this->pageData);
 
         $this->pageData[$actionName] = array(
             'time' => $this->getTime('init_wp_debugger'),
-            'current_time' => microtime(true),
+            'diff_time' => microtime(true),
             'memory' => $this->readableBytes(memory_get_usage())
         );
+
+        if (null != $lastKey &&  isset($this->pageData[$lastKey])) {
+            $prevTime = $this->pageData[$lastKey]['time'];
+        } else {
+            $prevTime = 0;
+        }
+
+        $this->pageData[$actionName]['diff_time'] = $this->pageData[$actionName]['time'] - $prevTime;
 
         if ('shutdown' == $actionName) {
             if (1 == $this->pageDataLogOption) {
@@ -146,7 +170,7 @@ class WpDebugger {
      */
     public function phpinfo () : void {
         if (isset($_GET[$this->getKey])) {
-            phpinfo(INFO_GENERAL);
+            phpinfo();
         }       
     }
     
@@ -186,7 +210,7 @@ class WpDebugger {
         $message = '';
 
         if (is_array($data) || is_object($data)) {
-            $message = print_r($data);
+            $message = print_r($data, true);
         } else {
             $message = $data;
         }
