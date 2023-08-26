@@ -45,7 +45,12 @@ class WpDebugger {
      * @var int
      */
     private $pageDataLogOption = 0;
-    
+        
+    /**
+     * __construct
+     *
+     * @return void
+     */
     public function __construct(){
         $this->timerStorage['init_wp_debugger'] = microtime(true);
         $this->byteStorage['init_wp_debugger'] = memory_get_usage();
@@ -59,7 +64,12 @@ class WpDebugger {
         add_action('admin_footer', array($this, 'setPageData'));       
         add_action('shutdown', array($this, 'setPageData'));
     }
-    
+        
+    /**
+     * setPageData
+     *
+     * @return void
+     */
     public function setPageData () : void{
         $actionName = current_action();
 
