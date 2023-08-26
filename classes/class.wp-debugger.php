@@ -44,7 +44,7 @@ class WpDebugger {
      * 0 - dont log, 1 - to  log file, 2 - var dump on page
      * @var int
      */
-    private $pageDataLogOption = 0;
+    private $pageDataLogOption = 2;
         
     /**
      * __construct
@@ -76,7 +76,7 @@ class WpDebugger {
         $this->pageData[$actionName] = array(
             'time' => $this->getTime('init_wp_debugger'),
             'current_time' => microtime(true),
-            'memory' => memory_get_usage()
+            'memory' => $this->readableBytes(memory_get_usage())
         );
 
         if ('shutdown' == $actionName) {
@@ -114,7 +114,7 @@ class WpDebugger {
      * @param  mixed $point
      * @return int
      */
-    public function getTime (string $point = 'init_wp_debugger') : ?int {
+    public function getTime (string $point = 'init_wp_debugger') : ?float {
         $time = null;
 
         if (isset($this->timerStorage[$point]) &&  microtime(true) > $this->timerStorage[$point]) {
@@ -158,7 +158,9 @@ class WpDebugger {
      */
     public function varDump ($data) : void {
         if (isset($_GET[$this->getKey])) {
+            echo  "<pre>";
             var_dump($data);
+            echo  "</pre>";
         }
     }
 
