@@ -44,16 +44,27 @@ class WpDebugger {
      * 0 - dont log, 1 - to  log file, 2 - var dump on page
      * @var int
      */
-    private $pageDataLogOption = 1;
+    private $pageDataLogOption = 0;
+
+    
+    /**
+     * doPing
+     * 1- do ping
+     * @var int
+     */
+    private $doPing = 0;
         
     /**
      * __construct
      *
      * @return void
      */
-    public function __construct(){
+    public function __construct(int $pageData = 0, int $doPing = 0) {
         $this->timerStorage['init_wp_debugger'] = microtime(true);
         $this->byteStorage['init_wp_debugger'] = memory_get_usage();
+
+        $this->pageDataLogOption = $pageData;
+        $this->doPing = $doPing;
 
         if (isset($_GET[$this->getKey])) {
 
@@ -65,6 +76,9 @@ class WpDebugger {
                 $this->pageDataLogOption = 2;
             }
         }
+        
+         
+
 
         if (0 != $this->pageDataLogOption ) {
             //plugins_loaded init wp_head wp_footer shutdown
@@ -171,9 +185,22 @@ class WpDebugger {
     public function phpinfo () : void {
         if (isset($_GET[$this->getKey])) {
             phpinfo();
+            if ($this->doPing) {
+                echo $this->ping(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1));
+            }           
         }       
     }
     
+    protected function ping ($backtrace) : string {
+
+        if (isset($backtrace[0]['file']) && isset($backtrace[0]['line'])) {
+            $file = $backtrace[0]['file'];
+            $line = $backtrace[0]['line'];
+            return printf("< L:%s  F:%s >", $line, $file);
+        }
+        return '';
+    }
+
     /**
      * varDump
      *
@@ -184,6 +211,9 @@ class WpDebugger {
         if (isset($_GET[$this->getKey])) {
             echo  "<pre>";
             var_dump($data);
+            if ($this->doPing) {
+                echo $this->ping(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1));
+            }
             echo  "</pre>";
         }
     }
@@ -213,6 +243,9 @@ class WpDebugger {
             $message = print_r($data, true);
         } else {
             $message = $data;
+        }
+        if ($this->doPing) {
+            $message.= "    " . $this->ping(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1));
         }
 
         $this->writeLog($message);

@@ -19,10 +19,13 @@ define('WPDEBUG_LOG_PATH', WPDEBUG_PATH . 'data/');
 require_once( WPDEBUG_PATH . 'classes/class.wp-debugger.php' );
 
 
-$GLOBALS['WpDebugger'] = new WpHelper\Debugger\WpDebugger();
+$pageData = 0;  // 0 - do nothing  1 - write  to  log    2 - draw on  page 
+$doPing = 0;  // 1 - add  info  in  log (file  and  line) 
+
+
+$GLOBALS['WpDebugger'] = new WpHelper\Debugger\WpDebugger($pageData, $doPing);
 
 function wpdebug() {
     global $WpDebugger;
     return $WpDebugger;
 }
-
