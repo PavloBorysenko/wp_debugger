@@ -241,7 +241,9 @@ class WpDebugger {
 
         if (is_array($data) || is_object($data)) {
             $message = print_r($data, true);
-        } else {
+        } elseif($data == null) {
+			$message = 'Null';
+		} else {
             $message = $data;
         }
         if ($this->doPing) {
