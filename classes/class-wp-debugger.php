@@ -3,7 +3,7 @@
  * Debbuger for WordPress. Main class.
  *
  * @class   WP_Debugger
- * @package Debugger_For_WordPress\Classes
+ * @package WpHelper\Classes
  */
 
 namespace WpHelper\Debugger;
@@ -71,10 +71,10 @@ class WP_Debugger {
 	 */
 	public function __construct( int $page_data = 0, int $do_ping = 0 ) {
 		$this->timer_storage['init_wp_debugger'] = microtime( true );
-		$this->byte_storage['init_wp_debugger']  = memory_get_usage();
+		$this->byte_storage['init_wp_debugger'] = memory_get_usage();
 
 		$this->page_data_log_option = $page_data;
-		$this->do_ping              = $do_ping;
+		$this->do_ping = $do_ping;
 
 		if ( isset( $_GET[ $this->get_key ] ) ) { // phpcs:ignore
 
@@ -110,9 +110,9 @@ class WP_Debugger {
 		$last_key = array_key_last( $this->page_data );
 
 		$this->page_data[ $action_name ] = array(
-			'time'      => $this->get_time( 'init_wp_debugger' ),
+			'time' => $this->get_time( 'init_wp_debugger' ),
 			'diff_time' => microtime( true ),
-			'memory'    => $this->readable_bytes( memory_get_usage() ),
+			'memory' => $this->readable_bytes( memory_get_usage() ),
 		);
 
 		if ( null !== $last_key && isset( $this->page_data[ $last_key ] ) ) {
@@ -239,7 +239,7 @@ class WP_Debugger {
 	 * @param int $bytes num The number of bytes.
 	 */
 	private function readable_bytes( int $bytes ) {
-		$i     = floor( log( $bytes ) / log( 1024 ) );
+		$i = floor( log( $bytes ) / log( 1024 ) );
 		$sizes = array( 'B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB' );
 
 		return sprintf( '%.02F', $bytes / pow( 1024, $i ) ) * 1 . ' ' . $sizes[ $i ];
@@ -277,7 +277,7 @@ class WP_Debugger {
 	 * @return void
 	 */
 	private function write_log( string $message ): void {
-		$path     = WPDEBUG_LOG_PATH . '/error.log';
+		$path = WPDEBUG_LOG_PATH . '/error.log';
 		$data_log = gmdate( 'Y-m-d H:i:s' ) . ' - ' . $message . PHP_EOL;
 		file_put_contents( $path, $data_log, FILE_APPEND ); // phpcs:ignore
 	}

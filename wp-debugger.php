@@ -10,7 +10,7 @@
  * License: GPLv2 or later
  * Text Domain: wp_debugger
  *
- * @package    Debugger_For_WordPress
+ * @package    WpHelper
  */
 
 define( 'WPDEBUG_PATH', plugin_dir_path( __FILE__ ) );
