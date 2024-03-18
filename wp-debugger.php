@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Debugger for WordPress
  * Plugin URI: https://#
- * Description: Assistant for finding errors and optimizing scripts. wpdebug():varDump|log|phpinfo ?wp-debugger=1| ?wp-debugger=phpinfo|?wp-debugger=pagedata
- * Version: 0.0.1
+ * Description: Assistant for finding errors and optimizing scripts. wpdebug():var_dump|log|phpinfo ?wp-debugger=1| ?wp-debugger=phpinfo|?wp-debugger=pagedata
+ * Version: 1.0.0
  * Requires at least: 6.0
  * Requires PHP: 8.0
  * Author: PavloBorysenko
@@ -30,7 +30,7 @@ $GLOBALS['wp_debugger'] = new WpHelper\Debugger\WP_Debugger( $page_data, $do_pin
 /**
  * Get instance
  */
-function wpdebug() {
+function wpdebug(): WpHelper\Debugger\WP_Debugger {
 	global $wp_debugger;
 	return $wp_debugger;
 }

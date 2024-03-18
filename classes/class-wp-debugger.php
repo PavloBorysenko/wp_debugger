@@ -25,23 +25,23 @@ class WP_Debugger {
 	private $get_key = 'wp-debugger';
 
 	/**
-	 * list of timers
+	 * List of timers
 	 *
-	 * @var array
+	 * @var array<string, float>
 	 */
 	private $timer_storage = array();
 
 	/**
 	 * List of used memory
 	 *
-	 * @var array
+	 * @var array<string, float>
 	 */
 	private $byte_storage = array();
 
 	/**
 	 * List of entries in the current session
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	private $page_data = array();
 
@@ -71,31 +71,31 @@ class WP_Debugger {
 	 */
 	public function __construct( int $page_data = 0, int $do_ping = 0 ) {
 		$this->timer_storage['init_wp_debugger'] = microtime( true );
-		$this->byte_storage['init_wp_debugger'] = memory_get_usage();
+		$this->byte_storage['init_wp_debugger']  = memory_get_usage();
 
 		$this->page_data_log_option = $page_data;
-		$this->do_ping = $do_ping;
+		$this->do_ping              = $do_ping;
 
-		if ( isset( $_GET[ $this->get_key ] ) ) { // phpcs:ignore
+		if ( isset ( $_GET[ $this->get_key ] ) ) { // phpcs:ignore
 
-			if ( 'phpinfo' === (string) $_GET[ $this->get_key ] ) {
+			if ( 'phpinfo' === (string) $_GET[ $this->get_key ] ) {  // phpcs:ignore
 				add_action( 'init', array( $this, 'phpinfo' ), 9999 );
 			}
 
-			if ( 'pagedata' === (string) $_GET[ $this->get_key ] ) {
+			if ( 'pagedata' === (string) $_GET[ $this->get_key ] ) {  // phpcs:ignore
 				$this->page_data_log_option = 2;
 			}
 		}
 
 		if ( 0 !== $this->page_data_log_option ) {
 			// plugins_loaded init wp_head wp_footer shutdown.
-			add_action( 'plugins_loaded', array( $this, 'setPageData' ) );
-			add_action( 'init', array( $this, 'setPageData' ) );
-			add_action( 'wp_head', array( $this, 'setPageData' ) );
-			add_action( 'wp_footer', array( $this, 'setPageData' ) );
-			add_action( 'admin_head', array( $this, 'setPageData' ) );
-			add_action( 'admin_footer', array( $this, 'setPageData' ) );
-			add_action( 'shutdown', array( $this, 'setPageData' ) );
+			add_action( 'plugins_loaded', array( $this, 'set_page_data' ) );
+			add_action( 'init', array( $this, 'set_page_data' ) );
+			add_action( 'wp_head', array( $this, 'set_page_data' ) );
+			add_action( 'wp_footer', array( $this, 'set_page_data' ) );
+			add_action( 'admin_head', array( $this, 'set_page_data' ) );
+			add_action( 'admin_footer', array( $this, 'set_page_data' ) );
+			add_action( 'shutdown', array( $this, 'set_page_data' ) );
 		}
 	}
 
@@ -110,9 +110,9 @@ class WP_Debugger {
 		$last_key = array_key_last( $this->page_data );
 
 		$this->page_data[ $action_name ] = array(
-			'time' => $this->get_time( 'init_wp_debugger' ),
+			'time'      => $this->get_time( 'init_wp_debugger' ),
 			'diff_time' => microtime( true ),
-			'memory' => $this->readable_bytes( memory_get_usage() ),
+			'memory'    => $this->readable_bytes( memory_get_usage() ),
 		);
 
 		if ( null !== $last_key && isset( $this->page_data[ $last_key ] ) ) {
@@ -156,7 +156,7 @@ class WP_Debugger {
 	 * Get time by key
 	 *
 	 * @param  string $point recorded data key.
-	 * @return int
+	 * @return float|null
 	 */
 	public function get_time( string $point = 'init_wp_debugger' ): ?float {
 		$time = null;
@@ -171,13 +171,13 @@ class WP_Debugger {
 	 * Get used memory by key
 	 *
 	 * @param  string $point recorded data key.
-	 * @return int
+	 * @return float|null
 	 */
-	public function get_byte( string $point = 'init_wp_debugger' ): ?int {
+	public function get_byte( string $point = 'init_wp_debugger' ): ?float {
 		$byte = null;
 
 		if ( isset( $this->byte_storage[ $point ] ) ) {
-			$byte = microtime( true ) - memory_get_usage();
+			$byte = memory_get_usage() - $this->byte_storage[ $point ];
 		}
 
 		return $byte;
@@ -192,10 +192,10 @@ class WP_Debugger {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			die( 'forbidden' );
 		}
-		if ( isset( $_GET[ $this->get_key ] ) ) {
+		if ( isset ( $_GET[ $this->get_key ] ) ) { // phpcs:ignore
 			phpinfo(); // phpcs:ignore
 			if ( $this->do_ping ) {
-				echo ecs_html( $this->ping( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 1 ) ) ); // phpcs:ignore
+				echo esc_html( $this->ping( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 1 ) ) ); // phpcs:ignore
 			}
 		}
 	}
@@ -203,7 +203,7 @@ class WP_Debugger {
 	/**
 	 * Write code line
 	 *
-	 * @param  array $backtrace  of  debug_backtrace.
+	 * @param  array<int, mixed> $backtrace  of  debug_backtrace.
 	 * @return string
 	 */
 	protected function ping( array $backtrace ): string {
@@ -223,7 +223,7 @@ class WP_Debugger {
 	 * @return void
 	 */
 	public function var_dump( $data ): void {
-		if ( isset( $_GET[ $this->get_key ] ) ) {
+		if ( isset ( $_GET[ $this->get_key ] ) ) { // phpcs:ignore
 			echo '<pre>';
 			var_dump( $data ); // phpcs:ignore
 			if ( $this->do_ping ) {
@@ -238,8 +238,8 @@ class WP_Debugger {
 	 *
 	 * @param int $bytes num The number of bytes.
 	 */
-	private function readable_bytes( int $bytes ) {
-		$i = floor( log( $bytes ) / log( 1024 ) );
+	public function readable_bytes( int $bytes ): string {
+		$i     = floor( log( $bytes ) / log( 1024 ) );
 		$sizes = array( 'B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB' );
 
 		return sprintf( '%.02F', $bytes / pow( 1024, $i ) ) * 1 . ' ' . $sizes[ $i ];
@@ -277,7 +277,7 @@ class WP_Debugger {
 	 * @return void
 	 */
 	private function write_log( string $message ): void {
-		$path = WPDEBUG_LOG_PATH . '/error.log';
+		$path     = WPDEBUG_LOG_PATH . '/error.log';
 		$data_log = gmdate( 'Y-m-d H:i:s' ) . ' - ' . $message . PHP_EOL;
 		file_put_contents( $path, $data_log, FILE_APPEND ); // phpcs:ignore
 	}
